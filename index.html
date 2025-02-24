@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Recommendation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1E3A8A;
+            color: #FFFFFF;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #F97316;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        select, input, button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background: #1E3A8A;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .song {
+            background: white;
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Music Recommendation System</h2>
+        <select id="query_type">
+            <option value="song">Song Name</option>
+            <option value="artist">Artist Name</option>
+            <option value="lyrics">Lyrics</option>
+        </select>
+        <input type="text" id="query" placeholder="Enter your query here...">
+        <button onclick="getRecommendations()">Get Recommendations</button>
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        function getRecommendations() {
+            let query = document.getElementById("query").value;
+            let queryType = document.getElementById("query_type").value;
+
+            fetch("/recommend", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `query=${query}&query_type=${queryType}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultsDiv = document.getElementById("results");
+                resultsDiv.innerHTML = "";
+                if (data.recommendations) {
+                    data.recommendations.forEach(song => {
+                        let songDiv = document.createElement("div");
+                        songDiv.classList.add("song");
+                        songDiv.innerHTML = `<strong>${song.name}</strong> by ${song.artists} (${song.genre})`;
+                        resultsDiv.appendChild(songDiv);
+                    });
+                } else {
+                    resultsDiv.innerHTML = `<p>${data.message}</p>`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
